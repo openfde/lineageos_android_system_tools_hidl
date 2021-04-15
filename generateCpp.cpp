@@ -1061,8 +1061,9 @@ void AST::generateStaticProxyMethodSource(Formatter& out, const std::string& kla
             method,
             superInterface);
 
-    out << "::android::hardware::Parcel _hidl_data;\n";
-    out << "::android::hardware::Parcel _hidl_reply;\n";
+    out << "bool isHostHwBinder = ::android::hardware::IInterface::isHostHwBinder(_hidl_this);\n";
+    out << "::android::hardware::Parcel _hidl_data(isHostHwBinder);\n";
+    out << "::android::hardware::Parcel _hidl_reply(isHostHwBinder);\n";
     out << "::android::status_t _hidl_err;\n";
     out << "::android::status_t _hidl_transact_err;\n";
     out << "::android::hardware::Status _hidl_status;\n\n";
@@ -1095,7 +1096,7 @@ void AST::generateStaticProxyMethodSource(Formatter& out, const std::string& kla
 
     if (hasInterfaceArgument) {
         // Start binder threadpool to handle incoming transactions
-        out << "::android::hardware::ProcessState::self()->startThreadPool();\n";
+        out << "::android::hardware::ProcessState::self(isHostHwBinder)->startThreadPool();\n";
     }
     out << "_hidl_transact_err = ::android::hardware::IInterface::asBinder(_hidl_this)->transact("
         << method->getSerialId()
